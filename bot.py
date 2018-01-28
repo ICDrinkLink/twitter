@@ -75,12 +75,17 @@ class EmojiDrinkListener(tweepy.StreamListener):
     def on_status(self, status):
         tweetText = status.text
 
-        if ("#cocktail" in tweetText.lower()):
-            self.randomCocktail(status)
-        elif ("#games" in tweetText.lower()):
-            self.games(status)
+        if ("#cocktail" in tweetText.lower()) and ("#games" in tweetText.lower()):
+            api.update_status(
+                "@" + status.author.screen_name + " Tweet me either emojis for mixes or #Cocktail for a cocktail or #Games for games",
+                status.id)
         else:
-            self.emojiDrink(status)
+            if ("#cocktail" in tweetText.lower()):
+                self.randomCocktail(status)
+            elif ("#games" in tweetText.lower()):
+                self.games(status)
+            else:
+                self.emojiDrink(status)
 
     def games(self, status):
         userScrName = status.author.screen_name
@@ -118,7 +123,7 @@ class EmojiDrinkListener(tweepy.StreamListener):
         if message != "":
             api.update_status("@" + userScrName + " Here's Your Drink 🍸: " + message, status.id)
         else:
-            api.update_status("@" + userScrName + " Please tweet me emojis to get your mix or #Cocktail for a random cocktails", status.id)
+            api.update_status("@" + userScrName + " Tweet me either emojis for mixes or #Cocktail for a cocktail or #Games for games ", status.id)
 
     def randomCocktail(self, status):
         userScrName = status.author.screen_name
@@ -148,8 +153,8 @@ class EmojiDrinkListener(tweepy.StreamListener):
                 for chunk in request:
                     image.write(chunk)
 
-            api.update_status("@" + userScrName + " " + instruction, status.id)
-            api.update_with_media(filename, "@" + userScrName + " " + message1, in_reply_to_status_id = status.id)
+            status1 = api.update_with_media(filename, "@" + userScrName + " " + message1, in_reply_to_status_id = status.id)
+            api.update_status("@" + userScrName + " " + instruction, status1.id)
 
             os.remove(filename)
 
